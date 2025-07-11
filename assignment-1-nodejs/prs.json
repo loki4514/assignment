@@ -1,0 +1,22 @@
+[
+    {
+        "id": "PR001",
+        "plant": "PlantA",
+        "amount": 40000
+    },
+    {
+        "id": "PR002",
+        "plant": "PlantC",
+        "amount": 20000
+    },
+    {
+        "id": "PR003",
+        "plant": "PlantB",
+        "amount": 60000
+    },
+    {
+        "id": "PR004",
+        "plant": "PlantB",
+        "amount": 45000
+    }
+]

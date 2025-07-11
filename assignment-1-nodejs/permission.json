@@ -1,0 +1,10 @@
+{
+    "role": "buyer",
+    "dataPermissions": {
+        "allowedPlants": [
+            "PlantA",
+            "PlantB"
+        ],
+        "maxAmount": 50000
+    }
+}
