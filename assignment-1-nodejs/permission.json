@@ -2,8 +2,7 @@
     "role": "buyer",
     "dataPermissions": {
         "allowedPlants": [
-            "PlantA",
-            "PlantB"
+            "PlantC"
         ],
         "maxAmount": 50000
     }

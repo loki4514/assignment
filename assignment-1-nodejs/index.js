@@ -157,6 +157,8 @@ app.get('/getPRs', async (req, res) => {
     }
 });
 
+
+
 // API: /permissions - Get current user permissions
 app.get('/permissions', async (req, res) => {
     try {
@@ -275,11 +277,46 @@ function evaluateCondition(condition, totalAmount, deliveryDays) {
     return false;
 }
 
+
+let approval_ids = []
+
+app.get('/getPending', (req, res) => {
+    console.log(" /getPending hit");
+    const pendingApprovals = approval_ids.filter(pr => pr.status === "Manual Approval");
+    return res.json({
+        success: true,
+        message: "Pending approvals",
+        data: pendingApprovals
+    });
+});
+
+app.post('/approvePR/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const index = approval_ids.findIndex(pr => pr.id === id);
+    if (index === -1) {
+        return res.status(404).json({
+            success: false,
+            message: `PR with id ${id} not found in pending approvals`
+        });
+    }
+
+    // Update status to Approved
+    approval_ids[index].status = "Approved";
+
+    return res.json({
+        success: true,
+        message: `PR with id ${id} has been approved`,
+        data: approval_ids[index]
+    });
+});
+
+
 // Main API: Process Purchase Requisition
 app.post('/processPR', (req, res) => {
     try {
         const pr = { ...req.body };
-        
+
         // Validate required fields
         if (!pr.totalAmount || !pr.deliveryDate) {
             return res.status(400).json({
@@ -287,7 +324,7 @@ app.post('/processPR', (req, res) => {
                 message: "totalAmount and deliveryDate are required"
             });
         }
-        
+
         // Calculate delivery days
         const deliveryDays = calculateDeliveryDays(pr.deliveryDate);
         const totalAmount = pr.totalAmount;
@@ -307,15 +344,17 @@ app.post('/processPR', (req, res) => {
             }
         });
 
-        // Set defaults if not set by rules
-        if (!pr.status) {
-            pr.status = 'Pending';
-        }
-        if (!pr.urgency) {
-            pr.urgency = 'Normal';
+        // Force manual approval if totalAmount > 10000
+        if (totalAmount > 10000) {
+            pr.status = "Manual Approval";
+            pr.id = Math.floor(Math.random() * 1000000); // Better random ID
+            approval_ids.push(pr);
         }
 
-        // Add calculated delivery days to response
+        // Set defaults if not set
+        if (!pr.status) pr.status = 'Pending';
+        if (!pr.urgency) pr.urgency = 'Normal';
+
         pr.deliveryDays = deliveryDays;
 
         res.json({
@@ -331,6 +370,7 @@ app.post('/processPR', (req, res) => {
         });
     }
 });
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({
